@@ -3,11 +3,11 @@ FLAGS = -g
 
 all: run
 
-lists: lists.c
+arraylist: arraylist.c
 	$(CC) $(FLAGS) $^ -o $@
 
 clean:
-	rm lists || true
+	rm arraylist || true
 
-run: clean lists
-	./lists
+run: clean arraylist
+	./arraylist
