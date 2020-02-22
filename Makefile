@@ -1,9 +1,10 @@
 CC = gcc
+FLAGS = -g
 
 all: run
 
 lists: lists.c
-	$(CC) $^ -o $@
+	$(CC) $(FLAGS) $^ -o $@
 
 clean:
 	rm lists || true

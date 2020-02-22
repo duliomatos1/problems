@@ -28,9 +28,10 @@ void print_int_array_list(ArrayList *list) {
       printf("%d ", elem);
     }
   }
+  printf("\n");
 }
 
-void resize_buffer(ArrayList *list) {
+void grow_buffer(ArrayList *list) {
   size_t new_capacity = list->capacity * GROWTH_FACTOR;
   list->buffer = realloc(list->buffer, new_capacity);
   list->capacity = new_capacity;
@@ -40,7 +41,7 @@ void resize_buffer(ArrayList *list) {
 int array_list_insert(ArrayList *list, size_t position, void *element) {
   if (position > list->capacity) return 0;
   if (list->tail_position >= list->capacity) {
-    resize_buffer(list);
+    grow_buffer(list);
   }
 
   void* current_element = malloc(list->element_size);
@@ -74,9 +75,22 @@ int array_list_remove(ArrayList *list, size_t position) {
   return 1;
 }
 
-void array_list_add(ArrayList *list, void *element) {
-  array_list_insert(list, list->tail_position, element);
+int array_list_add(ArrayList *list, void *element) {
+  return array_list_insert(list, list->tail_position, element);
 }
+
+void* array_list_at(ArrayList *list, size_t position) {
+  if (position >= list->tail_position) return NULL;
+  return ((char*) list->buffer) + position * list->element_size;
+}
+
+#define GEN_ARRAY_LIST_AT(name,type) \
+  type array_list_ ## name ## _at(ArrayList *list, size_t pos) { \
+    return *((type*) array_list_at(list, pos)); \
+  }
+
+GEN_ARRAY_LIST_AT(int,int)
+GEN_ARRAY_LIST_AT(str,char*)
 
 int main(int argc, char** argv) {
   int elements[] = {32, 98, 54, 21, 43};
@@ -86,4 +100,21 @@ int main(int argc, char** argv) {
     array_list_add(&list, elements + i);
   }
   print_int_array_list(&list);
+  array_list_remove(&list, 2);
+  print_int_array_list(&list);
+
+  int elem = *((int*) array_list_at(&list, 3));
+  printf("Element 3: %d\n", elem);
+
+  elem = array_list_int_at(&list, 1);
+  printf("Element 1: %d\n", elem);
+
+  char* str_elements[] = {"Hello", "World", "Brazil"};
+  ArrayList str_list;
+  init_array_list(&str_list, sizeof(char*));
+  for (int i=0; i < 3; i++) {
+    array_list_add(&str_list, str_elements[i]);
+  }
+  printf("\n%c\n", ((char**)str_list.buffer)[0][0]);
+  //printf("Element 1: %s\n", array_list_str_at(&str_list, 1));
 }
