@@ -11,3 +11,6 @@ clean:
 
 run: clean arraylist
 	./arraylist
+
+debug: clean arraylist
+	gdb ./arraylist

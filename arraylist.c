@@ -90,6 +90,7 @@ void* array_list_at(ArrayList *list, size_t position) {
   }
 
 GEN_ARRAY_LIST_AT(int,int)
+GEN_ARRAY_LIST_AT(double,double)
 GEN_ARRAY_LIST_AT(str,char*)
 
 int main(int argc, char** argv) {
@@ -113,8 +114,8 @@ int main(int argc, char** argv) {
   ArrayList str_list;
   init_array_list(&str_list, sizeof(char*));
   for (int i=0; i < 3; i++) {
-    array_list_add(&str_list, str_elements[i]);
+    printf("%s\n", str_elements[i]);
+    array_list_add(&str_list, &str_elements[i]);
   }
-  printf("\n%c\n", ((char**)str_list.buffer)[0][0]);
-  //printf("Element 1: %s\n", array_list_str_at(&str_list, 1));
+  printf("Element 1: %s\n", array_list_str_at(&str_list, 1));
 }
