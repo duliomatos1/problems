@@ -122,6 +122,43 @@ void test_int_to_str() {
   printf("%s\n", int_to_str(-123456));
 }
 
+int is_anagram(char *s1, char *s2) {
+  int len1 = _strlen(s1);
+  int len2 = _strlen(s2);
+  if (len1 != len2) return 0;
+  char* used = malloc(len1 * sizeof(char));
+  memset(used, 0, len1);
+  for (int i=0; i < len1; i++) {
+    int found = 0;
+    for (int j=0; j < len1; j++) {
+      if (used[j]) continue;
+      if (s1[i] == s1[j]) {
+        found = 1;
+        used[j] = 1;
+      }
+    }
+    if (!found) return 0;
+  }
+  return 1;
+}
+
+void test_is_anagram() {
+  char* strs[][2] = {
+    {"abcde", "cbdae"},
+    {"hello", "good"},
+    {"abcde", "abcd"},
+    {"abc", "abcd"}
+  };
+  for (int i=0; i < 4; i++) {
+    printf(
+      "Is \"%s\" an anagram of \"%s\"? %d\n",
+      strs[i][0],
+      strs[i][1],
+      is_anagram(strs[i][0], strs[i][1])
+    );
+  }
+}
+
 int main(int argc, char **arv) {
-  test_int_to_str();
+  test_is_anagram();
 }
