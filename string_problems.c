@@ -159,6 +159,24 @@ void test_is_anagram() {
   }
 }
 
+int unique_chars(char *str) {
+  char used[256];
+  memset(&used, 0, 256);
+  int len = _strlen(str);
+  for (int i=0; i < len; i++) {
+    if (used[str[i]]) return 0;
+    used[str[i]] = 1;
+  }
+  return 1;
+}
+
+void test_unique_chars() {
+  char *strs[] = {"hello", "opium", "bola", "coisa", "cigano", "troco"};
+  for (int i=0; i < 6; i++) {
+    printf("Are \"%s\" chars unique? %d\n", strs[i], unique_chars(strs[i]));
+  }
+}
+
 int main(int argc, char **arv) {
-  test_is_anagram();
+  test_unique_chars();
 }
