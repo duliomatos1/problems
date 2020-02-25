@@ -1,16 +1,26 @@
 CC = gcc
 FLAGS = -g
 
-all: run
+all: arraylist string
 
 arraylist: arraylist.c
 	$(CC) $(FLAGS) $^ -o $@
 
+string: string_problems.c
+	$(CC) $(FLAGS) $^ -o $@
+
 clean:
 	rm arraylist || true
+	rm string || true
 
-run: clean arraylist
+run-array: clean arraylist
 	./arraylist
 
-debug: clean arraylist
+debug-array: clean arraylist
 	gdb ./arraylist
+
+run-string: clean string
+	./string
+
+debug-string: clean string
+	gdb ./string

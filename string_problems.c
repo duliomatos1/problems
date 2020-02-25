@@ -77,6 +77,51 @@ void test_longest_substring() {
   printf("%s\n", longest);
 }
 
+int str_to_int(char *str) {
+  int len = _strlen(str);
+  int result = 0;
+  int signal = 1;
+  int dec = 1;
+  int start = 0;
+  if (len == 0) return 0;
+  if (str[0] == '-') {
+    signal = -1;
+    start = 1;
+  }
+  for (int i = len - 1; i >= start; i--) {
+    result += (str[i] - '0') * dec;
+    dec *= 10;
+  }
+  return result * signal;
+}
+
+void test_string_to_int() {
+  printf("%d\n", str_to_int("12345"));
+  printf("%d\n", str_to_int("-12345"));
+}
+
+char* int_to_str(int value) {
+  char *result = malloc(16 * sizeof(char));
+  int pos = 0;
+  if (value < 0) {
+    result[pos++] = '-';
+    value *= -1;
+  }
+  int remainder = value;
+  do {
+    int digit = remainder % 10;
+    result[pos++] = '0' + digit;
+    remainder /= 10;
+  } while(remainder > 0);
+  result[pos] = '\0';
+  return result;
+}
+
+void test_int_to_str() {
+  printf("%s\n", int_to_str(123456));
+  printf("%s\n", int_to_str(-123456));
+}
+
 int main(int argc, char **arv) {
-  test_longest_substring();
+  test_int_to_str();
 }
