@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 int _strlen(char *str) {
   int len;
   for (len = 0; str[len] != 0; len++);
@@ -45,12 +44,39 @@ void test_palindrome() {
   }
 }
 
-void find_longest_substring(char *s1
 
-void test_longest_substring(char* s1, char* s2) {
-  char* longest = find_longest_substring("geekforgeeks", "squadgeekteam");
+char* find_longest_substring(char *s1, char *s2) {
+  int len1 = _strlen(s1);
+  int len2 = _strlen(s2);
+  int longest_start = 0;
+  int longest_length = 0;
+
+  for (int i = 0; i < len1; i++) {
+    for (int j = 0; j < len2; j++) {
+      int count = 0;
+      while (i + count < len1 && j + count < len2) {
+        if (s1[i + count] == s2[j + count]) {
+          count++;
+        } else {
+          break;
+        }
+      }
+      if (count > longest_length) {
+        longest_length = count;
+        longest_start = i;
+      }
+    }
+  }
+  char *substring = malloc((longest_length + 1) * sizeof(char));
+  memcpy(substring, s1 + longest_start, longest_length);
+  return substring;
+}
+
+void test_longest_substring() {
+  char* longest = find_longest_substring("geekforgeeks", "squadgeeksteam");
   printf("%s\n", longest);
 }
 
 int main(int argc, char **arv) {
+  test_longest_substring();
 }
