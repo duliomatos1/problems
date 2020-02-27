@@ -111,20 +111,20 @@ char* find_longest_substring_dp_rec(char *s1, char *s2) {
 char* find_longest_substring_dp(char *left_str, char *right_str) {
   int len1 = _strlen(left_str);
   int len2 = _strlen(right_str);
-  LCSCount** counts = malloc((len1 + 1) * (len2 + 1) * sizeof(LCSCount));
+  LCSCount* counts = malloc((len1 + 1) * (len2 + 1) * sizeof(LCSCount));
   const LCSCount zero_count = { .count = 0, .start = 0};
   LCSCount max_count = zero_count;
   for (int i=0; i <= len1; i++) {
     for (int j = 0; j <= len2; j++) {
-      LCSCount *new_count = &counts[i][j];
+      LCSCount *new_count = counts + i * len1 + j;
       if (i == 0 || j == 0) {
         *new_count = zero_count;
-      } else if (left_str[i] == right_str[j]) {
-        LCSCount *prev_count = &counts[i - 1][j - 1];
+      } else if (left_str[i - 1] == right_str[j - 1]) {
+        LCSCount *prev_count = counts + (i - 1) * len1 + j - 1;
         *new_count = *prev_count;
         new_count->count++;
         if (prev_count->count == 0) {
-          new_count->start = i;
+          new_count->start = i - 1;
         }
 
         if (new_count->count > max_count.count) {
@@ -135,6 +135,7 @@ char* find_longest_substring_dp(char *left_str, char *right_str) {
       }
     }
   }
+  free(counts);
   char *longest_substring = malloc((max_count.count + 1) * sizeof(char));
   memcpy(longest_substring, left_str + max_count.start, max_count.count);
   longest_substring[max_count.count] = '\0';
