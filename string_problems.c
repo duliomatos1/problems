@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+
 int _strlen(char *str) {
   int len;
   for (len = 0; str[len] != 0; len++);
@@ -72,8 +74,77 @@ char* find_longest_substring(char *s1, char *s2) {
   return substring;
 }
 
+typedef struct {
+  int count;
+  int start;
+} LCSCount;
+
+LCSCount recur_longest_substring(
+    LCSCount count, char *left_str, char *right_str, int i, int j) {
+  if (i < 0 || j < 0) return count;
+  if (left_str[i] == right_str[j]) {
+    count.count++;
+    count.start = i;
+    count = recur_longest_substring(count, left_str, right_str, i - 1, j - 1);
+  }
+  LCSCount zero_count = { .count = 0, .start = 0};
+  LCSCount count_left = recur_longest_substring(zero_count, left_str,  right_str, i - 1, j);
+  LCSCount count_right = recur_longest_substring(zero_count, left_str,  right_str, i, j - 1);
+  LCSCount new_count = (count_left.count > count_right.count) ? count_left : count_right;
+  count = (new_count.count > count.count) ? new_count : count;
+  return count;
+}
+
+char* find_longest_substring_dp_rec(char *s1, char *s2) {
+  /* A bad implementation, since it doesn't memoize previous calculations */
+  int len1 = _strlen(s1);
+  int len2 = _strlen(s2);
+  LCSCount c = { .count = 0, .start = 0};
+  LCSCount count = recur_longest_substring(c, s1, s2, len1 - 1, len2 - 1);
+  if (count.count == 0) return NULL;
+  char *longest_substring = malloc((count.count + 1) * sizeof(char));
+  memcpy(longest_substring, s1 + count.start, count.count);
+  longest_substring[count.count] = '\0';
+  return longest_substring;
+}
+
+char* find_longest_substring_dp(char *left_str, char *right_str) {
+  int len1 = _strlen(left_str);
+  int len2 = _strlen(right_str);
+  LCSCount** counts = malloc((len1 + 1) * (len2 + 1) * sizeof(LCSCount));
+  const LCSCount zero_count = { .count = 0, .start = 0};
+  LCSCount max_count = zero_count;
+  for (int i=0; i <= len1; i++) {
+    for (int j = 0; j <= len2; j++) {
+      LCSCount *new_count = &counts[i][j];
+      if (i == 0 || j == 0) {
+        *new_count = zero_count;
+      } else if (left_str[i] == right_str[j]) {
+        LCSCount *prev_count = &counts[i - 1][j - 1];
+        *new_count = *prev_count;
+        new_count->count++;
+        if (prev_count->count == 0) {
+          new_count->start = i;
+        }
+
+        if (new_count->count > max_count.count) {
+          max_count = *new_count;
+        }
+      } else {
+        *new_count = zero_count;
+      }
+    }
+  }
+  char *longest_substring = malloc((max_count.count + 1) * sizeof(char));
+  memcpy(longest_substring, left_str + max_count.start, max_count.count);
+  longest_substring[max_count.count] = '\0';
+  return longest_substring;
+}
+
 void test_longest_substring() {
-  char* longest = find_longest_substring("geekforgeeks", "squadgeeksteam");
+  printf("Finding longest substring...\n");
+  char* longest = find_longest_substring_dp("geekforgeeks", "squadgeeksteam");
+  printf("Done!\n");
   printf("%s\n", longest);
 }
 
@@ -177,6 +248,40 @@ void test_unique_chars() {
   }
 }
 
+int is_rotation(char *s1, char *s2) {
+  int len1 = _strlen(s1);
+  int len2 = _strlen(s2);
+  if (len1 != len2) return 0;
+  for (int offset=0; offset < len1; offset++) {
+    int is_rotation = 1;
+    for (int pos=0; pos < len1; pos++) {
+      if (s1[pos] != s2[(pos + offset) % len1]) {
+        is_rotation =0;
+        break;
+      }
+    }
+    if (is_rotation) return 1;
+  }
+  return 0;
+}
+
+void test_is_rotation() {
+  char* strs[][2] = {
+    {"abcde", "eabcd"},
+    {"hello", "good"},
+    {"abcde", "abcde"},
+    {"abc", "abcd"}
+  };
+  for (int i=0; i < 4; i++) {
+    printf(
+      "Is \"%s\" a rotation of \"%s\"? %d\n",
+      strs[i][0],
+      strs[i][1],
+      is_rotation(strs[i][0], strs[i][1])
+    );
+  }
+}
+
 int main(int argc, char **arv) {
-  test_unique_chars();
+  test_longest_substring();
 }
