@@ -1,9 +1,12 @@
 CC = gcc
 FLAGS = -g
 
-all: arraylist string
+all: arraylist string hashtable
 
 arraylist: arraylist.c
+	$(CC) $(FLAGS) $^ -o $@
+
+hashtable: hashtable.c
 	$(CC) $(FLAGS) $^ -o $@
 
 string: string_problems.c
@@ -24,3 +27,6 @@ run-string: clean string
 
 debug-string: clean string
 	gdb ./string
+
+run-hashtable: clean hashtable
+	./hashtable
