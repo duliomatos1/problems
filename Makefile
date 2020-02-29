@@ -30,3 +30,6 @@ debug-string: clean string
 
 run-hashtable: clean hashtable
 	./hashtable
+
+debug-hashtable: clean hashtable
+	gdb ./hashtable
