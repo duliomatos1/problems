@@ -3,6 +3,9 @@
 #include <string.h>
 
 #define NUM_BUCKETS 128
+#define MAKE_INT_HASHTABLE(table) make_hashtable((table), sizeof(int), sizeof(int), &make_hash_int, &default_equal_keys);
+#define MAKE_STR_HASHTABLE(table) make_hashtable((table), sizeof(char *), sizeof(char *), &make_hash_str, &str_equal_keys);
+#define DISTRIBUTE(value) (((value) * 13 + 17) % NUM_BUCKETS)
 
 typedef struct element {
   void* key;
@@ -10,12 +13,12 @@ typedef struct element {
   struct element* next;
 } element;
 
-typedef struct {
+typedef struct hashtable {
   element buffer[NUM_BUCKETS];
   size_t key_size;
   size_t element_size;
   size_t (*make_hash)(void *);
-  // TODO include pointer to key comparison function
+  int (*equal_keys)(struct hashtable*, void*, void*);
 } hashtable;
 
 typedef struct {
@@ -33,10 +36,13 @@ void make_hashtable(
     hashtable *table,
     size_t key_size,
     size_t element_size,
-    size_t (*make_hash)(void *)) {
+    size_t (*make_hash)(void *),
+    int (*equal_keys)(hashtable *, void *, void *)
+) {
   table->key_size = key_size;
   table->element_size = element_size;
   table->make_hash = make_hash;
+  table->equal_keys = equal_keys;
   for (int i=0; i < NUM_BUCKETS; i++) {
     table->buffer[i].key = NULL;
     table->buffer[i].value = NULL;
@@ -45,10 +51,20 @@ void make_hashtable(
 }
 
 size_t make_hash_int(void* item) {
-  return ((size_t) *((int*) item) * 13 + 17) % NUM_BUCKETS;
+  return DISTRIBUTE(*((int*) item));
 }
 
-int equal_keys(hashtable* table, void* key1, void* key2) {
+size_t make_hash_str(void* item) {
+  char *str = (char*) item;
+  size_t len = strlen(str);
+  size_t value = 0;
+  for (int i=0; i < len; i++) {
+    value += str[i];
+  }
+  return DISTRIBUTE(value);
+}
+
+int default_equal_keys(hashtable* table, void* key1, void* key2) {
   char *k1 = (char*) key1;
   char *k2 = (char*) key2;
   for (size_t i=0; i < table->key_size; i++) {
@@ -59,11 +75,17 @@ int equal_keys(hashtable* table, void* key1, void* key2) {
   return 1;
 }
 
+int str_equal_keys(hashtable* table, void* key1, void* key2) {
+  char *str1 = (char *) key1;
+  char *str2 = (char *) key2;
+  return strcmp(str1, str2) == 0;
+}
+
 void put(hashtable* table, void* key, void* item) {
   size_t hash = table->make_hash(key);
   element* position = &table->buffer[hash];
   while (1) {
-    if (position->key == NULL || equal_keys(table, key, position->key)) {
+    if (position->key == NULL || table->equal_keys(table, key, position->key)) {
       position->key = key;
       position->value = item;
       return;
@@ -120,7 +142,7 @@ void* get(hashtable* table, void *key) {
   size_t hash = table->make_hash(key);
   element* position = &table->buffer[hash];
   do {
-    if (equal_keys(table, key, position->key)) {
+    if (table->equal_keys(table, key, position->key)) {
       return position->value;
     }
     position = position->next;
@@ -130,39 +152,46 @@ void* get(hashtable* table, void *key) {
 
 void test_print_all_from_key_iter(hashtable *table) {
   hashtable_iter iter = make_iter(table);
-  printf("print all key, value pairs\n");
+  printf("print all key, value pairs from key iterator: \n\n");
   void *key;
   while ((key = next_key(&iter)) != NULL) {
     int *k = (int *) key;
     int *v= (int*) get(table, key);
     printf("%d: %d\n", *k, *v);
   }
+  printf("\n\n\n");
 }
 
 void test_print_all_from_key_value_iter(hashtable *table) {
   hashtable_iter iter = make_iter(table);
-  printf("print all key, value pairs\n");
+  printf("print all key, value pairs from k, v iter\n\n");
   hashtable_key_value kv;
-
-  while ((kv = next_key_value(&iter)) != NULL) {
-    int *k = (int *) key;
-    int *v= (int*) get(table, key);
+  while (1) {
+    kv = next_key_value(&iter);
+    if (kv.key == NULL) {
+      break;
+    }
+    int *k = (int *) kv.key;
+    int *v= (int*) kv.value;
     printf("%d: %d\n", *k, *v);
   }
+  printf("\n\n\n");
 }
 
 void test_print_all(hashtable *table) {
+  printf("print all key, value pairs\n\n");
   for (int k=0; k < 1000; k++) {
     int *v= (int*) get(table, &k);
     printf("%d: %d\n", k, *v);
   }
+  printf("\n\n\n");
 }
 
-int main(int argc, char** argv) {
+void test_int_hashtable() {
   int keys[1000];
   int values[1000];
   hashtable table;
-  make_hashtable(&table, sizeof(int), sizeof(int), &make_hash_int);
+  MAKE_INT_HASHTABLE(&table);
   
   for (int i=0; i < 1000; i++) {
     keys[i] = i;
@@ -170,4 +199,10 @@ int main(int argc, char** argv) {
     put(&table, &keys[i], &values[i]);
   }
   test_print_all(&table);
+  test_print_all_from_key_iter(&table);
+  test_print_all_from_key_value_iter(&table);
+}
+
+int main(int argc, char** argv) {
+  test_int_hashtable();
 }
