@@ -24,6 +24,11 @@ typedef struct {
   element* cur_pos;
 } hashtable_iter;
 
+typedef struct {
+  void *key;
+  void *value;
+} hashtable_key_value;
+
 void make_hashtable(
     hashtable *table,
     size_t key_size,
@@ -96,6 +101,21 @@ void* next_key(hashtable_iter* iter) {
   return key;
 }
 
+hashtable_key_value next_key_value(hashtable_iter* iter) {
+  hashtable_key_value kv;
+  kv.key = NULL;
+  kv.value = NULL;
+  while (iter->cur_pos == NULL || iter->cur_pos->key == NULL) {
+    iter->cur_bucket++;
+    if (iter->cur_bucket >= NUM_BUCKETS) return kv;
+    iter->cur_pos = &iter->table->buffer[iter->cur_bucket];
+  }
+  kv.key = iter->cur_pos->key;
+  kv.value = iter->cur_pos->value;
+  iter->cur_pos = iter->cur_pos->next;
+  return kv;
+}
+
 void* get(hashtable* table, void *key) {
   size_t hash = table->make_hash(key);
   element* position = &table->buffer[hash];
@@ -106,6 +126,36 @@ void* get(hashtable* table, void *key) {
     position = position->next;
   } while (position != NULL);
   return NULL;
+}
+
+void test_print_all_from_key_iter(hashtable *table) {
+  hashtable_iter iter = make_iter(table);
+  printf("print all key, value pairs\n");
+  void *key;
+  while ((key = next_key(&iter)) != NULL) {
+    int *k = (int *) key;
+    int *v= (int*) get(table, key);
+    printf("%d: %d\n", *k, *v);
+  }
+}
+
+void test_print_all_from_key_value_iter(hashtable *table) {
+  hashtable_iter iter = make_iter(table);
+  printf("print all key, value pairs\n");
+  hashtable_key_value kv;
+
+  while ((kv = next_key_value(&iter)) != NULL) {
+    int *k = (int *) key;
+    int *v= (int*) get(table, key);
+    printf("%d: %d\n", *k, *v);
+  }
+}
+
+void test_print_all(hashtable *table) {
+  for (int k=0; k < 1000; k++) {
+    int *v= (int*) get(table, &k);
+    printf("%d: %d\n", k, *v);
+  }
 }
 
 int main(int argc, char** argv) {
@@ -119,12 +169,5 @@ int main(int argc, char** argv) {
     values[i] = i*i;
     put(&table, &keys[i], &values[i]);
   }
-  hashtable_iter iter = make_iter(&table);
-  printf("print all key, value pairs\n");
-  void *key;
-  while ((key = next_key(&iter)) != NULL) {
-    int *k = (int *) key;
-    int *v= (int*) get(&table, key);
-    printf("%d: %d\n", *k, *v);
-  }
+  test_print_all(&table);
 }
