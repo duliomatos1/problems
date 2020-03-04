@@ -231,6 +231,11 @@ int find_next_word(char *str, int pos, int len, int *start, int *end) {
   return pos;
 }
   
+int cmp_word_freq(const void *kv1, const void *kv2) {
+  hashtable_key_value *key_value1 = (hashtable_key_value*) kv1;
+  hashtable_key_value *key_value2 = (hashtable_key_value*) kv2;
+  return *((int*) key_value1->value) < *((int*) key_value2->value);
+}
 
 void test_count_word_frequency_dickens() {
   char *filename = "/home/duliomatos/Charles_Dickens_-_A_Tale_of_Two_Cities.txt";
@@ -266,9 +271,11 @@ void test_count_word_frequency_dickens() {
   pos = 0;
   int start = 0;
   int end = 0;
+  int word_count = 0;
   while (pos < size) {
     pos = find_next_word(contents, pos, size, &start, &end);
     if (start < end) {
+      ++word_count;
       // Put a \0 over the whitespace to delimit the words
       contents[end + 1] = '\0';
       int *count = get(&table, contents + start); 
@@ -278,10 +285,22 @@ void test_count_word_frequency_dickens() {
       }
       ++*count;
       put(&table, contents + start, count);
-      printf("%s: %d\n", contents + start, *count); 
     }
   }
-
+  hashtable_key_value *all_words = malloc(word_count * sizeof(hashtable_key_value));
+  hashtable_iter iter = make_iter(&table);
+  int cur_word = 0;
+  hashtable_key_value kv;
+  while ((kv = (hashtable_key_value) next_key_value(&iter)).key != NULL) {
+    if (strlen((char*) kv.key) > 3) {
+      all_words[cur_word++] = kv;
+    }
+  }
+  qsort(all_words, cur_word, sizeof(hashtable_key_value), &cmp_word_freq);
+  for (int i = 0; i < 25; i++) {
+    printf("%s  %d\n", (char*) all_words[i].key, *((int*) all_words[i].value));
+  }
+ 
   free(contents);
 }
 
