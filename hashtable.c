@@ -246,12 +246,10 @@ void test_count_word_frequency_dickens() {
     return;
   }
   int fd = fileno(fp);
-  printf("Opened %s...\n", filename);
 
   struct stat st;
   fstat(fd, &st);
   off_t size = st.st_size;
-  printf("File size is %ld\n", size);
 
   char *contents = malloc(size * sizeof(char) + 1);
   size_t pos = 0;
