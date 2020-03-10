@@ -12,6 +12,9 @@ hashtable: hashtable.c
 string: string_problems.c
 	$(CC) $(FLAGS) $^ -o $@
 
+heap: heap.c
+	$(CC) $(FLAGS) $^ -o $@
+
 clean:
 	rm arraylist || true
 	rm string || true
@@ -33,3 +36,9 @@ run-hashtable: clean hashtable
 
 debug-hashtable: clean hashtable
 	gdb ./hashtable
+
+run-heap: clean heap
+	./heap
+
+debug-heap: clean heap
+	gdb ./heap
