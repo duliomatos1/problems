@@ -12,8 +12,14 @@ hashtable: hashtable.c
 string: string_problems.c
 	$(CC) $(FLAGS) $^ -o $@
 
-heap: heap.c
+heap: heap.c array.o
 	$(CC) $(FLAGS) $^ -o $@ -lm
+
+sort: sort.c array.o
+	$(CC) $(FLAGS) $^ -o $@
+
+%.o: %.c
+	$(CC) $(FLAGS) $< -c
 
 clean:
 	rm arraylist || true
@@ -42,3 +48,9 @@ run-heap: clean heap
 
 debug-heap: clean heap
 	gdb ./heap
+
+run-sort: clean sort
+	./sort
+
+debug-sort: clean sort
+	gdb ./sort

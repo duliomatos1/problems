@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "array.h"
+
 void print_int_heap(void *array, size_t size, int highlight)
 {
     int *arr = (int*) array;
@@ -56,7 +58,6 @@ void heapify(void *array,
   }
 }
 
-
 int int_bigger_than(void *array, size_t index1, size_t index2)
 {
     int *arr = (int *) array;
@@ -90,15 +91,6 @@ void heap_sort(void *array,
         swap(array, i, 0);
         push_down(array, i, 0, compare, swap);
     }
-}
-
-void print_int_array(void *array, size_t size)
-{
-    int *arr = (int*) array;
-    printf("[");
-    for (; size > 0; size--, arr++)
-        printf(" %d ", *arr);
-    printf("]\n");
 }
 
 #define TEST_SIZE 10
