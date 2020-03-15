@@ -13,7 +13,7 @@ string: string_problems.c
 	$(CC) $(FLAGS) $^ -o $@
 
 heap: heap.c
-	$(CC) $(FLAGS) $^ -o $@
+	$(CC) $(FLAGS) $^ -o $@ -lm
 
 clean:
 	rm arraylist || true

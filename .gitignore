@@ -2,3 +2,5 @@
 arraylist
 string
 hashtable
+*.swp
+*.swo
